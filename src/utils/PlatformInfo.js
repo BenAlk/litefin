@@ -144,6 +144,15 @@ class PlatformInfo {
             return 'desktop';
         }
 
+        // ---------------------------------------------------------------------
+        // Linux Kiosk Detection (Raspberry Pi appliance)
+        // ---------------------------------------------------------------------
+        // Plain Chromium kiosk tab, not a packaged app shell - identified by a
+        // custom token appended to Chromium's --user-agent flag at launch.
+        if (typeof navigator !== 'undefined' && /LitefinLinuxKiosk/i.test(navigator.userAgent || '')) {
+            return 'linux-kiosk';
+        }
+
         // Default to standard web browser environment
         return 'web';
     }
@@ -241,9 +250,20 @@ class PlatformInfo {
         );
     }
 
-    /** @returns {boolean} True if running in a standard web browser (excluding Android TV, Smart TVs, and desktop app shells) */
+    /** @returns {boolean} True if running in a standard web browser (excluding Android TV, Smart TVs, desktop app shells, and the Linux kiosk) */
     get isWeb() {
-        return this._platform === 'web' || (!this.isTizen && !this.isWebOS && !this.isAndroid && !this.isDesktop);
+        return (
+            this._platform === 'web' ||
+            (!this.isTizen && !this.isWebOS && !this.isAndroid && !this.isDesktop && !this.isLinuxKiosk)
+        );
+    }
+
+    /** @returns {boolean} True if running as the Linux kiosk appliance (Raspberry Pi, Chromium via cage) */
+    get isLinuxKiosk() {
+        return (
+            this._platform === 'linux-kiosk' ||
+            (typeof navigator !== 'undefined' && /LitefinLinuxKiosk/i.test(navigator.userAgent || ''))
+        );
     }
 
     /**

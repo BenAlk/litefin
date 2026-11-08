@@ -17,6 +17,7 @@ import { tizenAdapter } from '../tizen/TizenAdapter.js';
 import { webosAdapter } from '../webos/WebOSAdapter.js';
 import { androidAdapter } from '../android/AndroidAdapter.js';
 import { desktopAdapter } from '../desktop/DesktopAdapter.js';
+import { linuxAdapter } from '../linux/LinuxAdapter.js';
 import { webAdapter } from '../web/WebAdapter.js';
 import { platformInfo } from '../utils/PlatformInfo.js';
 import { webCodecsProbe } from '../utils/WebCodecsProbe.js';
@@ -106,6 +107,7 @@ class App {
         // - LG WebOS Smart TVs -> WebOSAdapter
         // - Android TV / Google TV / Android -> AndroidAdapter
         // - Packaged Desktop App Shells (Tauri) -> DesktopAdapter
+        // - Linux Kiosk Appliance (Raspberry Pi) -> LinuxAdapter
         // - Standard Web Browsers -> WebAdapter
         if (platformInfo.isTizen) {
             tizenAdapter.init();
@@ -115,6 +117,8 @@ class App {
             androidAdapter.init();
         } else if (platformInfo.isDesktop) {
             desktopAdapter.init();
+        } else if (platformInfo.isLinuxKiosk) {
+            linuxAdapter.init();
         } else {
             webAdapter.init();
         }
@@ -689,6 +693,8 @@ class App {
                     androidAdapter.exit();
                 } else if (platformInfo.isDesktop) {
                     desktopAdapter.exit();
+                } else if (platformInfo.isLinuxKiosk) {
+                    linuxAdapter.exit();
                 } else {
                     webAdapter.exit();
                 }

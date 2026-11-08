@@ -786,6 +786,12 @@ const webConfig = {
     optimization: {
         // Chunk splitting for efficient browser caching
         splitChunks: { chunks: 'all', maxSize: 250000 },
+        // Without a single shared runtime, splitChunks' maxSize-based splitting can
+        // duplicate singleton modules (e.g. platformInfo) into multiple independent
+        // instances across chunks, each with its own module cache - different parts
+        // of the app can end up seeing different singleton instances with
+        // inconsistent state. This forces one shared runtime/module cache.
+        runtimeChunk: 'single',
         minimizer: ['...', new CssMinimizerPlugin()]
     },
 
