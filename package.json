@@ -117,7 +117,8 @@
         "webostvjs": "^1.2.12",
         "webpack": "^5.88.2",
         "webpack-cli": "^5.1.4",
-        "webpack-dev-server": "^5.2.4"
+        "webpack-dev-server": "^5.2.4",
+        "ws": "^8.22.2"
     },
     "dependencies": {
         "@jellyfin/libass-wasm": "4.2.4",
