@@ -17,6 +17,7 @@ import { TizenAVPlayer } from './TizenAVPlayer.js';
 import { WebOSPlayer } from './WebOSPlayer.js';
 import { MoviVideoPlayer } from './MoviVideoPlayer.js';
 import { ExoVideoPlayer } from './ExoVideoPlayer.js';
+import { VlcBridgePlayer } from './VlcBridgePlayer.js';
 import { platformInfo } from '../../utils/PlatformInfo.js';
 import { MediaHelper } from './MediaHelper.js';
 import { buildJellyfinProfile, getDeviceCapabilities } from '../../api/DeviceProfile.js';
@@ -1550,6 +1551,21 @@ export class JellyfinPlayer extends EventEmitter {
             log.info('Using Tizen AVPlay backend (auto-detected)');
             this._backendType = 'tizen';
             this._backend    = new TizenAVPlayer(sharedOptions);
+            return;
+        }
+
+        // ----------------------------------------------------------------
+        // Auto-detect: Linux kiosk (Raspberry Pi) → VlcBridgePlayer.
+        // Must be checked explicitly and before the Desktop/Web MoviVideoPlayer
+        // auto-detect below — this hardware reports WebCodecs support, which
+        // would otherwise route it into MoviVideoPlayer (proven unusably slow
+        // on this hardware), and it must never fall through to the generic
+        // HtmlVideoPlayer fallback either.
+        // ----------------------------------------------------------------
+        if (platformInfo.isLinuxKiosk) {
+            log.info('Linux kiosk platform detected — using VLC bridge backend');
+            this._backendType = 'vlc-bridge';
+            this._backend    = new VlcBridgePlayer(sharedOptions);
             return;
         }
 
@@ -3326,6 +3342,20 @@ export class JellyfinPlayer extends EventEmitter {
         const currentMs = this.getCurrentPositionMs();
         const newMs = Math.max(0, currentMs + offsetMs);
         this.seek(newMs * 10000); // Convert ms to ticks
+    }
+
+    /**
+     * Forward intro-skipper segment timestamps to the active backend, if it
+     * supports them. Backend-agnostic, fire-and-forget — a no-op for every
+     * backend except VlcBridgePlayer, which uses this to drive VLC's own
+     * skip-intro OSD prompt.
+     * @param {number} introStartTicks
+     * @param {number} introEndTicks
+     */
+    setIntroSkipperTimestamps(introStartTicks, introEndTicks) {
+        if (typeof this._backend?.setIntroSkipperTimestamps === 'function') {
+            this._backend.setIntroSkipperTimestamps(introStartTicks, introEndTicks);
+        }
     }
 
     // ========================================================================

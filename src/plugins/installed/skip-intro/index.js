@@ -32,6 +32,23 @@ import './skip-intro.css';
 import { i18n } from '../../../utils/i18n.js';
 import { PlayerSettings } from '../../../utils/PlayerSettings.js';
 
+/**
+ * Pure decision function: should the already-fetched intro segment be
+ * forwarded to the active backend (e.g. VlcBridgePlayer, via
+ * JellyfinPlayer.setIntroSkipperTimestamps)?
+ *
+ * Only 'AskToSkip' forwards anything — 'Skip' already auto-skips on every
+ * platform via onTimeUpdate/player.seek() polling and needs no forwarding,
+ * and 'None' means the user doesn't want this segment type handled at all.
+ *
+ * @param {Array<{start: number, end: number}>} introSegment - this._introSegment
+ * @param {string} skipActionIntro - PlayerSettings.get('skipActionIntro')
+ * @returns {boolean}
+ */
+export function shouldForwardIntroToBridge(introSegment, skipActionIntro) {
+    return introSegment.length > 0 && skipActionIntro === 'AskToSkip';
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -194,6 +211,10 @@ const skipIntroPlugin = {
         // Fetch segment data for this episode (with per-item caching)
         // ----------------------------------------------------------------
         await this._loadSegments(item, api);
+
+        if (shouldForwardIntroToBridge(this._introSegment, PlayerSettings.get('skipActionIntro'))) {
+            api.getPlayer()?.setIntroSkipperTimestamps?.(this._introSegment[0].start, this._introSegment[0].end);
+        }
 
         // ----------------------------------------------------------------
         // Convenience reference map for the 4 raw segments by type string

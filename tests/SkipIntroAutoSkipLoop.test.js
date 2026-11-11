@@ -13,6 +13,7 @@ const pluginSource = readFileSync(
     'utf8'
 )
     .replace(/^import .*;\r?\n/gm, '')
+    .replace(/^export function/gm, 'function')
     .replace('export default skipIntroPlugin;', 'skipIntroPlugin;');
 
 function setupPlugin() {
