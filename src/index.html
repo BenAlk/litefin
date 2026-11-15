@@ -21,15 +21,31 @@
             -webkit-touch-callout: none !important;
         }
 
-        /* Seamless transparency mode when video player is active */
-        html.player-active, html.player-active[data-theme-mode],
-        body.player-active, body.player-active[data-theme-mode],
-        html.player-active #app, body.player-active #app,
-        html.player-active #page-container, body.player-active #page-container {
+        /*
+         * Seamless transparency mode when video player is active.
+         * Exists so the hardware video overlay plane beneath Chromium's own
+         * compositing layer (Tizen/WebOS/Android <video>) can show through.
+         * Raspberry Pi kiosk has no such overlay plane - VLC is cage's own,
+         * separate top-level surface - so staying transparent here only
+         * exposes whatever raw, uncleared frame cage is showing once VLC's
+         * surface closes (seen as a white flash on real hardware).
+         */
+        html.player-active:not(.linux-kiosk), html.player-active[data-theme-mode]:not(.linux-kiosk),
+        body.player-active:not(.linux-kiosk), body.player-active[data-theme-mode]:not(.linux-kiosk),
+        html.player-active:not(.linux-kiosk) #app, body.player-active:not(.linux-kiosk) #app,
+        html.player-active:not(.linux-kiosk) #page-container, body.player-active:not(.linux-kiosk) #page-container {
             background-color: transparent !important;
             background: transparent !important;
         }
     </style>
+    <script>
+        // Stamp the Linux kiosk marker class as early as possible, before any
+        // player-active CSS rule above has a chance to evaluate (see the
+        // "linux-kiosk" exclusion in the critical dark-baseline style block).
+        if (/LitefinLinuxKiosk/i.test(navigator.userAgent)) {
+            document.documentElement.classList.add('linux-kiosk');
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script>
         /*

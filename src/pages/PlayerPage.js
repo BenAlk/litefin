@@ -1052,6 +1052,35 @@ class PlayerPage extends Page {
             this._clearPlaybackStallWatchdog();
             this._onEnded();
         });
+        // VLC-bridge backend only (Raspberry Pi kiosk): a Back/Home press on
+        // the remote is handled by the bridge daemon directly, not by this
+        // page's own key listener (cage gives VLC exclusive input focus
+        // during playback). This is the daemon's only way to tell Litefin a
+        // stop happened - treated as 'remotestop' rather than 'ended', since
+        // 'ended' would report the full duration instead of the real stop
+        // position (see Session.stopFromRemote in the bridge daemon).
+        //
+        // Calls _stopAndExit() directly rather than onBack(): onBack()
+        // normally delegates to this._osd.handleBack(), whose real exit path
+        // (handleBack -> exitPlayerConfirmed -> emits 'exit' -> the osd 'exit'
+        // listener below calls _stopAndExit()) left the screen blank when
+        // tested on real hardware - Litefin's OSD is never actually shown or
+        // initialized while VLC owns the whole screen during vlc-bridge
+        // playback, unlike every other backend where OSD delegation works.
+        this._player.on('remotestop', () => {
+            this._clearPlaybackStallWatchdog();
+            if (this._isScreenLocked) {
+                this._showLockIndicator();
+                return;
+            }
+            if (this._isAutoRecovering) {
+                this._cancelAutoRecovery();
+            }
+            if (this._isSwitching) {
+                return;
+            }
+            this._stopAndExit(true, 'remoteStop');
+        });
         this._player.on('error', (err) => {
             this._clearPlaybackStallWatchdog();
             this._onPlayerError(err);
@@ -5006,8 +5035,14 @@ class PlayerPage extends Page {
             // so navigation cannot proceed until it finishes. If sync XHR throws and
             // falls back to async fetch (keepalive), awaiting ensures the fetch has a
             // chance to complete before the page context is destroyed.
+            //
+            // Raspberry Pi kiosk is the one exception: exiting the player here is a
+            // same-context SPA route change (router.back()), never a real page/webview
+            // teardown, so the sync-XHR guarantee above doesn't apply - only its cost
+            // does. A slow /Sessions/Playing/Stopped response was observed freezing the
+            // whole UI (white screen, no input) for several seconds on real hardware.
             try {
-                await this._reportPlaybackStopped(mediaSource, positionTicks, true, durationTicks);
+                await this._reportPlaybackStopped(mediaSource, positionTicks, !platformInfo.isLinuxKiosk, durationTicks);
             } catch (err) {
                 log.warn('Background stop report failed:', err);
             }
