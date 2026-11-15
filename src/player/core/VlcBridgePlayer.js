@@ -24,6 +24,7 @@ export class VlcBridgePlayer {
         this._currentTime = 0;
         this._paused = true;
         this._muted = false;
+        this._volume = 100;
         this._audioTracks = [];
         this._subtitleTracks = [];
     }
@@ -165,6 +166,17 @@ export class VlcBridgePlayer {
 
     isMuted() {
         return this._muted;
+    }
+
+    // Local UI state only, like setMuted/isMuted above - not forwarded to VLC.
+    // Real audio output volume on this hardware goes through the TV/soundbar
+    // over HDMI-CEC, not VLC's own internal digital volume.
+    setVolume(volume) {
+        this._volume = volume;
+    }
+
+    getVolume() {
+        return this._volume;
     }
 
     setSubtitleStreamIndex(index) {

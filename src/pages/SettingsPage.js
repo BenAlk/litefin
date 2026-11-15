@@ -3605,6 +3605,12 @@ class SettingsPage extends Page {
                         value: 'webos',
                         label: recommendedBackend === 'webos' ? `${base}${recSuffix}` : base
                     });
+                } else if (platformInfo.isLinuxKiosk) {
+                    const base = i18n.t('BackendVlcBridge') || 'VLC Bridge (Raspberry Pi Native)';
+                    options.push({
+                        value: 'vlc-bridge',
+                        label: recommendedBackend === 'vlc-bridge' ? `${base}${recSuffix}` : base
+                    });
                 }
 
                 // WebCodecs hardware accelerated player (Movi)

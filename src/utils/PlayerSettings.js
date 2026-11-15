@@ -29,10 +29,11 @@ const log = logger.create('PlayerSettings');
  *  - Android (mobile / TV)  → 'exoplayer' (Media3 ExoPlayer)
  *  - Samsung Smart TV       → 'avplay'    (Tizen AVPlay native player)
  *  - LG Smart TV            → 'webos'     (webOS native media element)
+ *  - Raspberry Pi kiosk     → 'vlc-bridge' (VLC via the Phase 3 bridge daemon)
  *  - Modern Web & Desktop   → 'movi'      (WebCodecs + WASM demuxer DirectPlay)
  *  - Fallback / Legacy Web  → 'html5'     (Standard HTML5 video player)
  * =========================================================================
- * @returns {'exoplayer'|'avplay'|'webos'|'movi'|'html5'}
+ * @returns {'exoplayer'|'avplay'|'webos'|'vlc-bridge'|'movi'|'html5'}
  */
 function getRecommendedPlayerBackend() {
     // Fall back safely if platformInfo is unavailable
@@ -41,6 +42,11 @@ function getRecommendedPlayerBackend() {
     if (platformInfo.isTizen) return 'avplay';
     // LG webOS TV hardware platform
     if (platformInfo.isWebOS) return 'webos';
+    // Raspberry Pi kiosk - must come before the isWeb/isDesktop WebCodecs
+    // check below, since isLinuxKiosk devices also report hasWebCodecsSupport
+    // and would otherwise be recommended 'movi' (proven unusably slow on this
+    // hardware - see Phase 2's findings).
+    if (platformInfo.isLinuxKiosk) return 'vlc-bridge';
     // Native Android / Google TV hardware platform (verify native bridge is present)
     if (platformInfo.isAndroid) {
         // Only recommend ExoPlayer if native bridge exists (e.g. not a generic mobile browser)

@@ -244,3 +244,18 @@ test('calling play() again (e.g. next episode) does not leak the previous connec
     player.destroy();
     await bridge.close();
 });
+
+test('getVolume/setVolume track local state without crashing (not forwarded to VLC - real volume is via HDMI-CEC)', async () => {
+    const bridge = await startFakeBridge();
+    const player = new VlcBridgePlayer({ container: null, settings: null, onEvent: () => {}, wsUrl: `ws://127.0.0.1:${bridge.port}` });
+    await player.play({ url: 'http://server/x.mkv', playerStartPositionTicks: 0 });
+    await waitUntil(() => bridge.received.length > 0);
+
+    assert.equal(player.getVolume(), 100);
+    player.setVolume(42);
+    assert.equal(player.getVolume(), 42);
+    assert.equal(bridge.received.length, 1); // no command sent to the bridge
+
+    player.destroy();
+    await bridge.close();
+});
