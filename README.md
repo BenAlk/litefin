@@ -3,16 +3,14 @@
 
 ![Litefin Banner](./documentations/previews/banner.png)
 
-[![GitHub license](https://img.shields.io/github/license/MoazSalem/litefin?color=orange&label=License)](https://github.com/MoazSalem/litefin/blob/release/LICENSE)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/MoazSalem/litefin?color=blue&label=Version&logo=github)](https://github.com/MoazSalem/litefin/releases)
-[![GitHub all releases](https://img.shields.io/github/downloads/MoazSalem/litefin/total?label=Downloads)](https://github.com/MoazSalem/litefin/releases)
 [![Discord Link](https://img.shields.io/discord/1498618592902647818?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.gg/N3VpazBtTx)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://www.buymeacoffee.com/moazsalem)
-[![GitHub Repo stars](https://img.shields.io/github/stars/MoazSalem/litefin)](https://github.com/MoazSalem/litefin/stargazers)
 
 Litefin is a high-performance, open-source Jellyfin (and Emby) client engineered from scratch for Smart TVs and Desktop. Whether you're running it on Samsung Tizen, LG webOS, Android TV, Amazon Fire TV, or native Desktop (Windows, Linux, macOS), Litefin delivers a unified, zero-bloat experience with hardware-optimized playback backends, pixel-perfect subtitle rendering, and a butter-smooth interface even on legacy hardware.
 
 Extend Litefin features by installing the **Litefin Plugin** on your [**Jellyfin**](https://github.com/MoazSalem/litefin-plugin) or [**Emby**](https://github.com/MoazSalem/litefin-plugin-emby) servers.
+
+> **This fork** adds a Raspberry Pi 4B kiosk appliance target: a `vlc-bridge` playback backend that hands video off to a native VLC process over a local bridge daemon, plus direct evdev remote-control input, running under `cage` instead of a full desktop. See the parent [`litefin-pi`](https://github.com/BenAlk/litefin-pi) project for the daemon, systemd units, and Pi-specific deployment notes - none of this fork's changes are packaged as standalone Smart TV/Desktop releases, so the "Quick Installation" links further down still point at upstream's own packages.
 
 <img width="1920" height="1080" alt="Screenshot 2026-09-30 194946" src="https://github.com/user-attachments/assets/6ef405e1-e530-4b1e-a747-2a681576e827" />
 
@@ -94,6 +92,8 @@ npm run package:android-tv
 ```
 
 ## Quick Installation
+
+> These `Releases` links are upstream's own prebuilt Smart TV/Desktop packages, which don't include this fork's Raspberry Pi kiosk changes. If you're after the Pi build, see [`litefin-pi`](https://github.com/BenAlk/litefin-pi) instead.
 
 ### Samsung Tizen TVs
 
